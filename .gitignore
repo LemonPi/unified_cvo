@@ -51,3 +51,12 @@ build
 *.ps
 *.pdf
 *.pyc
+
+# IDE
+.idea
+cmake-build-debug
+
+# if you mounted this repository as home for a docker image
+.viminfo
+.bashrc
+.bash_history
