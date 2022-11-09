@@ -100,11 +100,6 @@ int main(int argc, char *argv[]) {
     if (argc > 4)
         ell = std::stof(argv[4]);
 
-    // remove file extension
-    size_t lastindex = source_file.find_last_of(".");
-    auto out_file = source_file.substr(0, lastindex) + "_cvo.txt";
-    std::ofstream output{out_file};
-
     std::map<int, cvo::CvoPointCloud> poke_to_source;
 
     std::ifstream input_target{target_file};
@@ -122,7 +117,37 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // read initial transforms
+    size_t lastindex = source_file.find_last_of(".");
+    auto trans_file = source_file.substr(0, lastindex) + "_trans.txt";
+    auto trans_gt_file = source_file.substr(0, lastindex) + "_gt_trans.txt";
+    // switch to trans_gt_file for ground truth initialization
+    std::ifstream input_trans{trans_file};
+    int B;
+    input_trans >> B;
+    std::vector<Eigen::Matrix4f> guesses(B);
+    for (int _b = 0; _b < B; ++_b) {
+        int b;
+        input_trans >> b;
+        float v;
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                input_trans >> v;
+                guesses[b](i,j) = v;
+            }
+        }
+    }
+
+//    for (int b = 0; b < B; ++b) {
+//        std::cout << b << std::endl;
+//        std::cout << guesses[b] << std::endl;
+//    }
+
     return 0;
+
+    // remove file extension
+    auto out_file = source_file.substr(0, lastindex) + "_cvo.txt";
+    std::ofstream output{out_file};
 
     for (auto &pair: poke_to_source) {
         auto poke_index = pair.first;
@@ -147,10 +172,11 @@ int main(int argc, char *argv[]) {
 
         std::cout << "write ell! ell init is " << cvo_align.get_params().ell_init << std::endl;
 
-        // TODO read random initial guesses from external file
-        // TODO start with random rotation around origin
-        Eigen::Matrix4f init_guess = Eigen::Matrix4f::Identity();  // from source frame to the target frame
+        // TODO align for each batch index
+        // TODO align for each poke
+        Eigen::Matrix4f init_guess = guesses[0];  // from source frame to the target frame
 
+        return 0;
 
         Eigen::Matrix4f result, init_guess_inv;
         Eigen::Matrix4f identity_init = Eigen::Matrix4f::Identity();
