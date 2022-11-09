@@ -143,8 +143,6 @@ int main(int argc, char *argv[]) {
 //        std::cout << guesses[b] << std::endl;
 //    }
 
-    return 0;
-
     // remove file extension
     auto out_file = source_file.substr(0, lastindex) + "_cvo.txt";
     std::ofstream output{out_file};
@@ -153,7 +151,6 @@ int main(int argc, char *argv[]) {
         auto poke_index = pair.first;
         auto &source = pair.second;
 
-        // TODO align
         Eigen::Vector3f source_mean = get_pc_mean(source);
         Eigen::Vector3f target_mean = get_pc_mean(target);
 
@@ -173,13 +170,10 @@ int main(int argc, char *argv[]) {
         std::cout << "write ell! ell init is " << cvo_align.get_params().ell_init << std::endl;
 
         // TODO align for each batch index
-        // TODO align for each poke
-        Eigen::Matrix4f init_guess = guesses[0];  // from source frame to the target frame
-
-        return 0;
+        int b = 0;
+        Eigen::Matrix4f init_guess = guesses[b];  // from source frame to the target frame
 
         Eigen::Matrix4f result, init_guess_inv;
-        Eigen::Matrix4f identity_init = Eigen::Matrix4f::Identity();
         init_guess_inv = init_guess.inverse();
 
         printf("Start align... num_fixed is %d, num_moving is %d\n", source.num_points(), target.num_points());
@@ -188,39 +182,13 @@ int main(int argc, char *argv[]) {
         double this_time = 0;
         cvo_align.align(source, target, init_guess_inv, result, nullptr, &this_time);
 
-        //cvo_align.align(*source, *target, init_guess, result);
+        guesses[b] = result;
+        output << poke_index << ' ' << b << std::endl;
+        output << guesses[b] << std::endl;
 
-//        std::cout << "Transform is " << result << "\n\n";
-//        pcl::PointCloud <pcl::PointXYZRGB> pcd_old, pcd_new;
-//        cvo::CvoPointCloud new_pc(3, 19), old_pc(3, 19);
-//        cvo::CvoPointCloud::transform(init_guess, target, old_pc);
-//        cvo::CvoPointCloud::transform(result, target, new_pc);
-//        std::cout << "Just finished transform\n";
-//        cvo::CvoPointCloud sum_old = old_pc + source;
-//        cvo::CvoPointCloud sum_new = new_pc + source;
-//        std::cout << "Just finished CvoPointCloud concatenation\n";
-//        std::cout << "num of points before and after alignment is " << sum_old.num_points() << ", "
-//                  << sum_new.num_points()
-//                  << "\n";
-//        sum_old.export_to_pcd(pcd_old);
-//        sum_new.export_to_pcd(pcd_new);
-//        std::cout << "Just export to pcd\n";
-//        std::string fname("before_align.pcd");
-//        pcl::io::savePCDFileASCII(fname, pcd_old);
-//        fname = "after_align.pcd";
-//        pcl::io::savePCDFileASCII(fname, pcd_new);
         // append accum_tf_list for future initialization
         std::cout << "Average registration time is " << this_time << std::endl;
     }
-
-//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr source_pcd(new pcl::PointCloud <pcl::PointXYZRGB>);
-//    pcl::io::loadPCDFile(source_file, *source_pcd);
-//    std::shared_ptr <cvo::CvoPointCloud> source(new cvo::CvoPointCloud(*source_pcd));
-
-//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_pcd(new pcl::PointCloud <pcl::PointXYZRGB>);
-//    pcl::io::loadPCDFile(target_file, *target_pcd);
-//    std::shared_ptr <cvo::CvoPointCloud> target(new cvo::CvoPointCloud(*target_pcd));
-
 
     return 0;
 }
