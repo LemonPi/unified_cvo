@@ -51,9 +51,9 @@ cvo::CvoPointCloud read_pc(std::ifstream &input) {
 
     for (int i = 0; i < num_points; i++) {
         Eigen::Vector3f xyz;
-        float x,y,z;
+        float x, y, z;
         input >> x >> y >> z;
-        xyz << x,y,z;
+        xyz << x, y, z;
 
         Eigen::Matrix<float, FEATURE_DIMENSIONS, 1> feature;
         feature << 0;
@@ -62,9 +62,9 @@ cvo::CvoPointCloud read_pc(std::ifstream &input) {
         int occupied;
         input >> occupied;
         if (occupied == 1) {
-            semantics << 0, 1;
+            semantics << 0.1, 0.9;
         } else {
-            semantics << 1, 0;
+            semantics << 0.9, 0.1;
         }
 
 
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
     std::ifstream input_trans{trans_file};
     int B;
     input_trans >> B;
-    std::vector<Eigen::Matrix4f> guesses(B);
+    std::vector <Eigen::Matrix4f> guesses(B);
     for (int _b = 0; _b < B; ++_b) {
         int b;
         input_trans >> b;
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < 4; ++j) {
                 input_trans >> v;
-                guesses[b](i,j) = v;
+                guesses[b](i, j) = v;
             }
         }
     }
@@ -144,7 +144,12 @@ int main(int argc, char *argv[]) {
 //    }
 
     // remove file extension
-    auto out_file = source_file.substr(0, lastindex) + "_cvo.txt";
+    size_t fileindex = source_file.find_last_of("/\\");
+    auto out_dir = source_file.substr(0, fileindex) + "/cvo/";
+    if (!exists(out_dir)) {
+        create_directory(out_dir);
+    }
+    auto out_file = out_dir + source_file.substr(fileindex + 1);
     std::ofstream output{out_file};
 
     for (auto &pair: poke_to_source) {
