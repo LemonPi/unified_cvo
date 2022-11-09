@@ -170,24 +170,26 @@ int main(int argc, char *argv[]) {
         std::cout << "write ell! ell init is " << cvo_align.get_params().ell_init << std::endl;
 
         // TODO align for each batch index
-        int b = 0;
-        Eigen::Matrix4f init_guess = guesses[b];  // from source frame to the target frame
+//        int b = 0;
+        for (int b = 0; b < B; ++b) {
+            Eigen::Matrix4f init_guess = guesses[b];  // from source frame to the target frame
 
-        Eigen::Matrix4f result, init_guess_inv;
-        init_guess_inv = init_guess.inverse();
+            Eigen::Matrix4f result, init_guess_inv;
+            init_guess_inv = init_guess.inverse();
 
-        printf("Start align... num_fixed is %d, num_moving is %d\n", source.num_points(), target.num_points());
-        std::cout << std::flush;
+            printf("Start align... num_fixed is %d, num_moving is %d\n", source.num_points(), target.num_points());
+            std::cout << std::flush;
 
-        double this_time = 0;
-        cvo_align.align(source, target, init_guess_inv, result, nullptr, &this_time);
+            double this_time = 0;
+            cvo_align.align(source, target, init_guess_inv, result, nullptr, &this_time);
 
-        guesses[b] = result;
-        output << poke_index << ' ' << b << std::endl;
-        output << guesses[b] << std::endl;
+            guesses[b] = result;
+            output << poke_index << ' ' << b << std::endl;
+            output << guesses[b] << std::endl;
 
-        // append accum_tf_list for future initialization
-        std::cout << "Average registration time is " << this_time << std::endl;
+            // append accum_tf_list for future initialization
+            std::cout << "Average registration time is " << this_time << std::endl;
+        }
     }
 
     return 0;
