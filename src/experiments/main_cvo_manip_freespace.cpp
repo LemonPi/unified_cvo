@@ -174,7 +174,6 @@ int main(int argc, char *argv[]) {
 
         std::cout << "write ell! ell init is " << cvo_align.get_params().ell_init << std::endl;
 
-        // TODO align for each batch index
 //        int b = 0;
         for (int b = 0; b < B; ++b) {
             Eigen::Matrix4f init_guess = guesses[b];  // from source frame to the target frame
@@ -188,8 +187,12 @@ int main(int argc, char *argv[]) {
             double this_time = 0;
             cvo_align.align(source, target, init_guess_inv, result, nullptr, &this_time);
 
+            double cost = cvo_align.function_angle(source, target, result.inverse(), 0.1, false);
+            // is a cosine value, so we can transform it such that the best has cost 0 by 1 - cost
+            cost = 1 - cost;
+
             guesses[b] = result;
-            output << poke_index << ' ' << b << std::endl;
+            output << poke_index << ' ' << b << ' ' << cost << std::endl;
             output << guesses[b] << std::endl;
 
             // append accum_tf_list for future initialization
