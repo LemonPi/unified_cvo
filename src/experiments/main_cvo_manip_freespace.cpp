@@ -156,15 +156,16 @@ int main(int argc, char *argv[]) {
         auto poke_index = pair.first;
         auto &source = pair.second;
 
-        Eigen::Vector3f source_mean = get_pc_mean(source);
-        Eigen::Vector3f target_mean = get_pc_mean(target);
+//        Eigen::Vector3f source_mean = get_pc_mean(source);
+//        Eigen::Vector3f target_mean = get_pc_mean(target);
 
-        float dist = (source_mean - target_mean).norm();
-        std::cout << "source mean is " << source_mean << ", target mean is " << target_mean << ", dist is " << dist
-                  << std::endl;
+//        float dist = (source_mean - target_mean).norm();
+//        std::cout << "source mean is " << source_mean << ", target mean is " << target_mean << ", dist is " << dist
+//                  << std::endl;
         cvo::CvoGPU cvo_align(cvo_param_file);
         cvo::CvoParams &init_param = cvo_align.get_params();
-        init_param.ell_init = dist; //init_param.ell_init_first_frame;
+        // TODO try parameter sweeping from 0.1 to 0.5
+        init_param.ell_init = 0.1; //init_param.ell_init_first_frame;
 
         if (argc > 4)
             init_param.ell_init = ell;
