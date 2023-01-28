@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cmath>
 #include <map>
+#include <chrono>
 #include <boost/filesystem.hpp>
 //#include "dataset_handler/KittiHandler.hpp"
 #include "utils/ImageStereo.hpp"
@@ -87,6 +88,16 @@ cvo::CvoPointCloud read_pc(std::ifstream &input) {
         pc.add_point(i, xyz, feature, semantics, geometric_type);
     }
     return pc;
+}
+
+template <
+        class result_t   = std::chrono::milliseconds,
+        class clock_t    = std::chrono::steady_clock,
+        class duration_t = std::chrono::milliseconds
+>
+auto since(std::chrono::time_point<clock_t, duration_t> const& start)
+{
+return std::chrono::duration_cast<result_t>(clock_t::now() - start);
 }
 
 int main(int argc, char *argv[]) {
@@ -177,6 +188,7 @@ int main(int argc, char *argv[]) {
 
 //        int b = 0;
         for (int b = 0; b < B; ++b) {
+            auto start = std::chrono::steady_clock::now();
             Eigen::Matrix4f init_guess = guesses[b];  // from source frame to the target frame
 
             Eigen::Matrix4f result, init_guess_inv;
@@ -193,7 +205,8 @@ int main(int argc, char *argv[]) {
             cost = 1 - cost;
 
             guesses[b] = result;
-            output << poke_index << ' ' << b << ' ' << cost << std::endl;
+            auto elapsed = static_cast<float>(since(start).count()) / 1000;
+            output << poke_index << ' ' << b << ' ' << cost << ' ' << elapsed << std::endl;
             output << guesses[b] << std::endl;
 
             // append accum_tf_list for future initialization
