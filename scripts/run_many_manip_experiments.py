@@ -32,6 +32,7 @@ parser.add_argument('--task', type=str, nargs='+',
                     choices=['all'] + tasks, help='what tasks to run')
 parser.add_argument('--params', default=f"{ROOT_DIR}/cvo_params/johnson_manip_params.yaml", help='CVO parameters file')
 parser.add_argument('--dry', action='store_true', help='print the commands to run without execution')
+parser.add_argument('--real', action='store_true', help='whether to run the real experiments or sim experiments')
 
 args = parser.parse_args()
 
@@ -41,8 +42,9 @@ if __name__ == "__main__":
         args.task = tasks
     for task in args.task:
         for seed in args.seed:
-            source_file = f"{ROOT_DIR}/data/poke/{task.upper()}_{seed}.txt"
-            target_file = f"{ROOT_DIR}/data/poke/{task.upper()}.txt"
+            experiment_name = "poke_real_processed" if args.real else "poke"
+            source_file = f"{ROOT_DIR}/data/{experiment_name}/{task.upper()}_{seed}.txt"
+            target_file = f"{ROOT_DIR}/data/{experiment_name}/{task.upper()}.txt"
             to_run = [f"{ROOT_DIR}/build/bin/cvo_align_manip_freespace", source_file, target_file, args.params]
 
             cmd = " ".join(to_run)
